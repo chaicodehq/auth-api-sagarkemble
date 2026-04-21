@@ -1,6 +1,6 @@
-import { Router } from 'express';
-import { register, login, me } from '../controllers/auth.controller.js';
-import { authenticate } from '../middlewares/auth.middleware.js';
+import { Router } from "express";
+import { register, login, me } from "../controllers/auth.controller.js";
+import { authenticate } from "../middlewares/auth.middleware.js";
 
 /**
  * TODO: Define auth routes
@@ -11,7 +11,8 @@ import { authenticate } from '../middlewares/auth.middleware.js';
  */
 
 const router = Router();
-
-// Your routes here
+router.post("/login", login);
+router.post("/register", register);
+router.get("/me", authenticate, me);
 
 export default router;

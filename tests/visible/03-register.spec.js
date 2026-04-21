@@ -1,10 +1,10 @@
-import request from 'supertest';
-import bcrypt from 'bcryptjs';
-import { createApp } from '../../src/app.js';
-import { User } from '../../src/models/user.model.js';
-import { setupDb, teardownDb, resetDb } from '../__helpers__/setupTestDb.js';
+import request from "supertest";
+import bcrypt from "bcryptjs";
+import { createApp } from "../../src/app.js";
+import { User } from "../../src/models/user.model.js";
+import { setupDb, teardownDb, resetDb } from "../__helpers__/setupTestDb.js";
 
-describe('Test 3: User Registration', () => {
+describe("Test 3: User Registration", () => {
   let app;
 
   beforeAll(async () => {
@@ -20,16 +20,16 @@ describe('Test 3: User Registration', () => {
     await resetDb();
   });
 
-  describe('POST /api/auth/register', () => {
+  describe("POST /api/auth/register", () => {
     const validUser = {
-      name: 'John Doe',
-      email: 'john@example.com',
-      password: 'password123',
+      name: "John Doe",
+      email: "john@example.com",
+      password: "password123",
     };
 
-    it('should register a new user with valid data', async () => {
+    it("should register a new user with valid data", async () => {
       const response = await request(app)
-        .post('/api/auth/register')
+        .post("/api/auth/register")
         .send(validUser);
 
       expect(response.status).toBe(201);
@@ -39,21 +39,26 @@ describe('Test 3: User Registration', () => {
       expect(response.body.user.password).toBeUndefined();
     });
 
-    it('should hash the password before saving', async () => {
-      await request(app).post('/api/auth/register').send(validUser);
+    it("should hash the password before saving", async () => {
+      await request(app).post("/api/auth/register").send(validUser);
 
-      const user = await User.findOne({ email: validUser.email }).select('+password');
+      const user = await User.findOne({ email: validUser.email }).select(
+        "+password",
+      );
       expect(user.password).not.toBe(validUser.password);
 
-      const isValidPassword = await bcrypt.compare(validUser.password, user.password);
+      const isValidPassword = await bcrypt.compare(
+        validUser.password,
+        user.password,
+      );
       expect(isValidPassword).toBe(true);
     });
 
-    it('should return 409 when email already exists', async () => {
-      await request(app).post('/api/auth/register').send(validUser);
+    it("should return 409 when email already exists", async () => {
+      await request(app).post("/api/auth/register").send(validUser);
 
       const response = await request(app)
-        .post('/api/auth/register')
+        .post("/api/auth/register")
         .send(validUser);
 
       expect(response.status).toBe(409);
@@ -61,45 +66,45 @@ describe('Test 3: User Registration', () => {
       expect(response.body.error.message).toMatch(/email.*already.*exists/i);
     });
 
-    it('should validate email format', async () => {
+    it("should validate email format", async () => {
       const response = await request(app)
-        .post('/api/auth/register')
-        .send({ ...validUser, email: 'invalid-email' });
+        .post("/api/auth/register")
+        .send({ ...validUser, email: "invalid-email" });
 
       expect(response.status).toBe(400);
       expect(response.body.error).toBeDefined();
     });
 
-    it('should require password to be at least 6 characters', async () => {
+    it("should require password to be at least 6 characters", async () => {
       const response = await request(app)
-        .post('/api/auth/register')
-        .send({ ...validUser, password: '12345' });
+        .post("/api/auth/register")
+        .send({ ...validUser, password: "12345" });
 
       expect(response.status).toBe(400);
       expect(response.body.error).toBeDefined();
     });
 
-    it('should require name field', async () => {
+    it("should require name field", async () => {
       const response = await request(app)
-        .post('/api/auth/register')
+        .post("/api/auth/register")
         .send({ email: validUser.email, password: validUser.password });
 
       expect(response.status).toBe(400);
       expect(response.body.error).toBeDefined();
     });
 
-    it('should require email field', async () => {
+    it("should require email field", async () => {
       const response = await request(app)
-        .post('/api/auth/register')
+        .post("/api/auth/register")
         .send({ name: validUser.name, password: validUser.password });
 
       expect(response.status).toBe(400);
       expect(response.body.error).toBeDefined();
     });
 
-    it('should require password field', async () => {
+    it("should require password field", async () => {
       const response = await request(app)
-        .post('/api/auth/register')
+        .post("/api/auth/register")
         .send({ name: validUser.name, email: validUser.email });
 
       expect(response.status).toBe(400);
@@ -108,26 +113,26 @@ describe('Test 3: User Registration', () => {
 
     it('should set default role to "user"', async () => {
       const response = await request(app)
-        .post('/api/auth/register')
+        .post("/api/auth/register")
         .send(validUser);
 
-      expect(response.body.user.role).toBe('user');
+      expect(response.body.user.role).toBe("user");
     });
 
-    it('should convert email to lowercase', async () => {
+    it("should convert email to lowercase", async () => {
       const response = await request(app)
-        .post('/api/auth/register')
-        .send({ ...validUser, email: 'JOHN@EXAMPLE.COM' });
+        .post("/api/auth/register")
+        .send({ ...validUser, email: "JOHN@EXAMPLE.COM" });
 
-      expect(response.body.user.email).toBe('john@example.com');
+      expect(response.body.user.email).toBe("john@example.com");
     });
 
-    it('should trim name field', async () => {
+    it("should trim name field", async () => {
       const response = await request(app)
-        .post('/api/auth/register')
-        .send({ ...validUser, name: '  John Doe  ' });
+        .post("/api/auth/register")
+        .send({ ...validUser, name: "  John Doe  " });
 
-      expect(response.body.user.name).toBe('John Doe');
+      expect(response.body.user.name).toBe("John Doe");
     });
   });
 });

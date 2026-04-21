@@ -1,3 +1,5 @@
+import { User } from "../models/user.model.js";
+
 /**
  * TODO: Check if user has required role
  *
@@ -14,6 +16,10 @@
  */
 export function requireRole(...roles) {
   return (req, res, next) => {
-    // Your code here
+    if (!req.user)
+      return res.status(401).json({ error: { message: "Not authenticated" } });
+    if (!roles.includes(req.user.role))
+      return res.status(403).json({ error: { message: "Forbidden" } });
+    next();
   };
 }

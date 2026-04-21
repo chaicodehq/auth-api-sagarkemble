@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 services:
   mongodb:
@@ -10,6 +10,8 @@ services:
     environment:
       # Database name that will be created automatically
       MONGO_INITDB_DATABASE: auth_api
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password
     volumes:
       # Persistent storage for database data
       - mongodb_data:/data/db
